@@ -18,7 +18,7 @@ var checkEveryNSeconds = 20,
       }).always(function(resp){
         
           var latest = resp.match( /\stype-post\s.*href="(.*)"/ )[1],
-              current = unsafeWindow.location.toString(),
+              current = unsafeWindow.location.toString().replace(/#.*/, ''),
               slugText = latest.match(/\.de\/(.*)\/?/)[1].replace(/[\-\/]/g,' ');
        
           if(latest !== current){
