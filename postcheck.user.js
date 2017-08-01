@@ -9,7 +9,7 @@
 // ==/UserScript==
 
 var checkEveryNSeconds = 20,
-    error404URL = '/api',
+    error404URL = '/',
     timeoutHandle = null,
     poll = function(){
       $.ajax({
@@ -17,7 +17,7 @@ var checkEveryNSeconds = 20,
         method : 'GET'
       }).always(function(resp){
         
-          var latest = resp.match( /\stype-post\s.*href="(.*)"/ )[1],
+          var latest = resp.match( /miniloops-2.*\stype-post\s.*href="(.*)"/ )[1],
               current = unsafeWindow.location.toString().replace(/#.*/, ''),
               slugText = latest.match(/\.de\/(.*)\/?/)[1].replace(/[\-\/]/g,' ');
        
