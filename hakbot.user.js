@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name        likegrind
-// @namespace   rapupdatexxx
-// @description likes every shit
+// @name        hakbot
+// @namespace   rapupdategrind
+// @description adds misc features
 // @include     https://disqus.com/embed/comments/*
 // @version     1
-// @require       http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
+// @require     http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
 // @grant       unsafeWindow
 // ==/UserScript==
 // wie lange soll gewartet werden auf die antwort des "neue kommentare buttons"
@@ -19,6 +19,7 @@ upvoteEveryNFuzzy = 3,
 timeoutHandle,
 intervalHandle,
 ENABLED = false,
+AUTOUPDATE = false,
 upvote = function () {
   var upvoteLinks = document.querySelectorAll('a.vote-up:not(.upvoted):not(.upvote-attempted-3)'),
   nextLink = upvoteLinks[0],
@@ -32,17 +33,17 @@ upvote = function () {
   i;
   // wenn neue kommentare geladen werden können: laden statte voten damit nicht
   // 2 calls gleichzeitig passieren
-  if (loadMoreButton && now > lastAutoUpdate + waitForNewComments * 1000) {
+  if (AUTOUPDATE && loadMoreButton && now > lastAutoUpdate + waitForNewComments * 1000) {
     loadMoreButton.click();
     lastAutoUpdate = now;
     skipUpvote = true;
   }
-  if (newCommentsButton) {
+  if (AUTOUPDATE && newCommentsButton) {
       newCommentsButton.click();
   }  
   // 3 versuche
 
-  if (!skipUpvote && nextLink) {
+  if (ENABLED && !skipUpvote && nextLink) {
     if (nextLink.classList.contains('upvote-attempted-2')) {
       nextLink.classList.add('upvote-attempted-3');
     }
@@ -62,9 +63,7 @@ upvote = function () {
   
 },
 enqueue = function () {
-  if(!ENABLED){
-    return;
-  }
+
   timeoutHandle = setTimeout(upvote, upvoteEveryNSeconds + (Math.random() * upvoteEveryNFuzzy) * 1000);
 },
 waitForJQuery = function () {
@@ -81,12 +80,16 @@ waitForJQuery = function () {
 attachUi = function () {
   //toggle button einbauen
   var li = $('<li>').addClass('nav-tab nav-tab--secondary dropdown autogrind pull-right').insertAfter('.dropdown.sorting'),
-  label = $('<label>').prop('for','autogrind-toggle').prop('href', '#').text(' AUTOGRIND').appendTo(li).addClass('dropdown-toggle'),
-  input = $('<input>').prop('type','checkbox').prop('id','autogrind-toggle').prependTo(label);
+  label = $('<label>').prop('for','autogrind-toggle').prop('href', '#').text(' AUTOLIKE').appendTo(li).addClass('dropdown-toggle'),
+  input = $('<input>').prop('type','checkbox').prop('id','autogrind-toggle').prependTo(label),
+      
+  liUpdate = $('<li>').addClass('nav-tab nav-tab--secondary dropdown autogrind pull-right').insertAfter('.dropdown.sorting'),
+  labelUpdate = $('<label>').prop('for','autoupdate-toggle').prop('href', '#').text(' AUTOUPDATE').appendTo(liUpdate).addClass('dropdown-toggle'),
+  inputUpdate = $('<input>').prop('type','checkbox').prop('id','autoupdate-toggle').prependTo(labelUpdate);
   
-  label.css({
+  $(label).add(labelUpdate).css({
    display: 'block',
-   margin: 0,
+   margin: '0 0 0 20px',
    padding: 0,
    fontWeight: 700,
    lineHeight: 1,
@@ -97,9 +100,15 @@ attachUi = function () {
   
   $(input).get()[0].addEventListener('click', function(e){
     ENABLED = $(this).prop('checked');
-    clearTimeout(timeoutHandle);
-    enqueue();
+
   }, true);
+
+  $(inputUpdate).get()[0].addEventListener('click', function(e){
+    AUTOUPDATE = $(this).prop('checked');
+
+  }, true);
+  
+  enqueue();
   
 }, patchComments = function(){
  $('.post-message p:not(.patched)').each(function(i,item){
